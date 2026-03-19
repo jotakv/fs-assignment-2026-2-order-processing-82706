@@ -1,3 +1,137 @@
+
+## 🚀 Guía de Arquitectura para CA2: Blazor + API + CQRS
+
+Este es el núcleo de lo que tu profesor espera que entiendas (y reutilices) para tu entrega. No se trata de inventar algo nuevo, sino de aplicar este patrón profesional.
+
+---
+
+### 🧠 1. Lo que REALMENTE te están diciendo
+Tu profesor no quiere que inventes una arquitectura desde cero. Su mensaje es:
+
+> 👉 *"Usa este proyecto como plantilla de referencia para una arquitectura limpia usando **Blazor + API + CQRS (MediatR)**"*
+
+**Tu objetivo:**
+1. Entender cómo se conectan las piezas.
+2. Reutilizar la misma estructura en tu tarea.
+
+---
+
+### 🧱 2. La Arquitectura (Simplificada)
+Este es el modelo mental que necesitas seguir:
+
+
+
+* **Blazor UI (Frontend)**
+    * ↓
+* **API Controller**
+    * ↓
+* **Mediator (MediatR)**
+    * ↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘
+    * **Query** (Lectura) &nbsp;&nbsp; **Command** (Escritura)
+    * ↓
+* **Handlers** (Lógica de negocio)
+    * ↓
+* **Services / Repositories**
+    * ↓
+* **Database**
+
+---
+
+### 🔍 3. ¿Qué hace cada parte? (En lenguaje sencillo)
+
+#### 🟣 Blazor (Frontend)
+* Páginas como `Index.razor`.
+* Inyectas servicios en la parte superior.
+* Llamas a la API para cargar datos (productos, órdenes, etc.).
+* **Lo que viste:** *"injections at the top... code loading products"*. Es el patrón estándar de Blazor.
+
+#### 🔵 API Controllers
+El controlador no hace casi nada, solo reenvía la solicitud al Mediator:
+```csharp
+[HttpGet]
+public async Task<IActionResult> GetProducts()
+{
+    var result = await _mediator.Send(new GetProductsQuery());
+    return Ok(result);
+}
+```
+
+#### 🟡 CQRS (Commands & Queries)
+| Tipo | Propósito | Ejemplo |
+| :--- | :--- | :--- |
+| **Query** | Leer datos | `GetProductsQuery` |
+| **Command** | Cambiar datos | `CreateOrderCommand` |
+
+#### 🟢 Mediator (La "Magia")
+`await _mediator.Send(new GetProductsQuery());`
+El Mediator decide qué **Handler** debe ejecutar esa tarea. Ya no llamas a los servicios directamente.
+
+#### 🔴 Handlers
+Aquí es donde vive la lógica. El Handler recibe la orden del Mediator y habla con el repositorio.
+
+#### ⚫ AutoMapper
+Se usa para convertir objetos de base de datos a objetos de vista:
+* `Entity` → `DTO`
+* Ejemplo: `_mapper.Map<ProductDto>(product);`
+
+---
+
+### ⚙️ 4. Lo que TÚ necesitas aprender (Importante)
+Como mencionaste que esto es nuevo para ti, este es tu **gap de conocimiento**:
+
+🔥 **DEBES entender:**
+* **MediatR (CQRS):** Cómo fluyen las consultas/comandos.
+* **Flujo:** Controller → Mediator → Handler.
+
+---
+
+### 🧪 5. Estrategia recomendada por el profesor
+Él te dio dos caminos:
+* **Opción A (La más rápida ✅):** Copia esta arquitectura y adáptala.
+* **Opción B:** Pídele a una IA: *"Genera una arquitectura Blazor + API + CQRS (MediatR) con AutoMapper y caching"*.
+
+---
+
+### 🧩 6. Conexión con tu asignación (CA2)
+Para obtener los **10 puntos de "Code Quality & Architecture"**, necesitas esto. Ya tienes:
+* Actualizar .NET ✅
+* Logging (Serilog) ✅
+* Stripe ✅
+* CI (Integración Continua) ✅
+* **EXTRA:** Aplicar CQRS + Mediator te garantiza la máxima nota en arquitectura.
+
+---
+
+### 🚀 7. Qué hacer HOY (Paso a paso)
+
+1.  **Explora el proyecto de ejemplo:** Revisa las páginas de Blazor, los controladores y la carpeta `Features` (donde suelen estar los queries/commands).
+2.  **Rastrea un flujo completo:** Mira qué pasa desde que haces clic en "Cargar productos" en Blazor hasta que llega a la base de datos.
+3.  **Crea un ejemplo pequeño:** Intenta replicar un `GetOrdersQuery` y su respectivo Handler.
+4.  **Integra en CA2:** Usa esta estructura para Órdenes, Pagos y Productos.
+
+---
+
+### 🧠 8. Insight Clave para la nota máxima
+La mayoría de los estudiantes:
+* ❌ Pondrán la lógica en los controladores.
+* ❌ Saltarán CQRS.
+* ❌ Mezclarán todo en una sola capa.
+
+Si tú haces esto, estarás fácilmente en el **70%+ (First Class)**.
+
+---
+
+### 🧭 9. Sobre Aspire (Opcional)
+Él mencionó que **Aspire** orquesta múltiples APIs. Eso es para sistemas distribuidos avanzados.
+* Para tu tarea: **No es requerido**.
+* Es un **bono extra** si decides explorarlo después.
+
+---
+
+### 🎯 Conclusión
+No estás construyendo al azar. Estás reconstruyendo tu proyecto usando una **plantilla de arquitectura moderna y profesional**.
+
+
 # Assignment Descriptor
 
 **Module:** Full Stack Development – Semester 2, Assignment 2  
