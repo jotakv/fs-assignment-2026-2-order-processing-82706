@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\SportsStore.Application\SportsStore.Application.csproj" />
@@ -20,6 +20,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>624f4dfa-1019-4d71-a89c-4231c0f660f1</UserSecretsId>
   </PropertyGroup>
 
 </Project>

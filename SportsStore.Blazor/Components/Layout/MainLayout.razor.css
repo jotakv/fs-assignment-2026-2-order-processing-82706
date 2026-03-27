@@ -63,7 +63,28 @@
 
 #blazor-error-ui {
     background: #8f1f1f;
+    bottom: 0;
     color: #fff;
+    display: none;
+    left: 0;
+    padding: 0.75rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .reload,
+#blazor-error-ui .dismiss {
+    color: inherit;
+}
+
+#blazor-error-ui .reload {
+    margin-left: 0.75rem;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    float: right;
 }
 
 @media (max-width: 900px) {
