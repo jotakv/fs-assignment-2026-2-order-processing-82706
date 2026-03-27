@@ -1,0 +1,83 @@
+.shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 28%),
+        linear-gradient(180deg, #f5f0e8 0%, #eef1f7 100%);
+}
+
+.sidebar {
+    border-right: 1px solid rgba(28, 37, 55, 0.08);
+    background: linear-gradient(180deg, #102033 0%, #162a40 100%);
+}
+
+.main-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem 1rem;
+}
+
+.eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #516179;
+}
+
+.brand-link {
+    color: #152033;
+    font-size: 1.9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.cart-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+    border-radius: 999px;
+    background: #152033;
+    color: #fefcf7;
+    text-decoration: none;
+    box-shadow: 0 16px 32px rgba(21, 32, 51, 0.12);
+}
+
+.cart-chip.active {
+    background: #d86b2b;
+}
+
+.content {
+    padding: 0 2rem 2rem;
+}
+
+#blazor-error-ui {
+    background: #8f1f1f;
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .shell {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content {
+        padding: 0 1rem 1.5rem;
+    }
+}

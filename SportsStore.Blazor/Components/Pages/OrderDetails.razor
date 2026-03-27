@@ -1,0 +1,82 @@
+@page "/orders/{OrderId:int}"
+@inject SportsStore.Blazor.Services.Api.OrdersApiClient OrdersApi
+
+<PageTitle>Order Details</PageTitle>
+
+@if (_loading)
+{
+    <section class="page-card loading-state">Loading order details...</section>
+}
+else if (!string.IsNullOrWhiteSpace(_error))
+{
+    <section class="page-card error-state">@_error</section>
+}
+else if (_order is null)
+{
+    <section class="page-card empty-state">That order was not found.</section>
+}
+else
+{
+    <section class="page-card detail-card">
+        <span class="status-pill">@(_order.StripePaymentStatus ?? "unknown")</span>
+        <h1>Order #@_order.OrderID</h1>
+        <p>@_order.Name, @_order.Line1, @_order.City, @_order.Country</p>
+
+        <div class="detail-meta">
+            <div class="summary-row">
+                <span>Total</span>
+                <strong>@_order.TotalAmount.ToString("C")</strong>
+            </div>
+            <div class="summary-row">
+                <span>Items</span>
+                <strong>@_order.ItemCount</strong>
+            </div>
+            <div class="summary-row">
+                <span>Paid at</span>
+                <strong>@(_order.PaidAtUtc?.ToLocalTime().ToString("g") ?? "Pending")</strong>
+            </div>
+            <div class="summary-row">
+                <span>Shipping status</span>
+                <strong>@(_order.Shipped ? "Shipped" : "Awaiting shipment")</strong>
+            </div>
+        </div>
+
+        <div class="summary-panel">
+            @foreach (OrderLineDto line in _order.Lines)
+            {
+                <div class="order-line">
+                    <span>@line.Name x @line.Quantity</span>
+                    <strong>@line.LineTotal.ToString("C")</strong>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public int OrderId { get; set; }
+
+    private OrderDto? _order;
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _error = null;
+
+        try
+        {
+            _order = await OrdersApi.GetOrderAsync(OrderId);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

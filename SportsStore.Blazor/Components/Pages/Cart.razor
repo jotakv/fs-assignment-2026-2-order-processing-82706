@@ -1,0 +1,78 @@
+@page "/cart"
+@inject CartState CartState
+
+<PageTitle>Your Cart</PageTitle>
+
+<section class="page-card page-hero">
+    <h1>Your cart</h1>
+    <p>Cart state stays in browser session storage so the customer flow survives the Stripe redirect.</p>
+</section>
+
+@if (_loading)
+{
+    <section class="page-card loading-state">Loading cart...</section>
+}
+else if (CartState.Items.Count == 0)
+{
+    <section class="page-card empty-state">
+        Your cart is empty. Go back to the catalog and add something worth shipping.
+    </section>
+}
+else
+{
+    <section class="page-card cart-card">
+        <h2>Items</h2>
+
+        @foreach (CartItem item in CartState.Items)
+        {
+            <div class="cart-line">
+                <div class="summary-stack">
+                    <div class="price-row">
+                        <strong>@item.Name</strong>
+                        <span class="category-pill">@item.Category</span>
+                    </div>
+                    <p>@item.Price.ToString("C") each</p>
+                </div>
+
+                <div class="cart-actions">
+                    <div class="line-controls">
+                        <button class="quantity-button" @onclick="() => CartState.DecrementAsync(item.ProductID)">-</button>
+                        <span>@item.Quantity</span>
+                        <button class="quantity-button" @onclick="() => CartState.IncrementAsync(item.ProductID)">+</button>
+                    </div>
+                    <strong>@item.LineTotal.ToString("C")</strong>
+                    <button class="secondary-button" @onclick="() => CartState.RemoveAsync(item.ProductID)">Remove</button>
+                </div>
+            </div>
+        }
+
+        <div class="summary-panel">
+            <div class="summary-row">
+                <span>Total items</span>
+                <strong>@CartState.ItemCount</strong>
+            </div>
+            <div class="summary-row">
+                <span>Total amount</span>
+                <strong>@CartState.TotalAmount.ToString("C")</strong>
+            </div>
+            <div class="status-actions">
+                <button class="secondary-button" @onclick="CartState.ClearAsync">Clear cart</button>
+                <NavLink class="action-button" href="/checkout">Continue to checkout</NavLink>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    private bool _loading = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CartState.InitializeAsync();
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

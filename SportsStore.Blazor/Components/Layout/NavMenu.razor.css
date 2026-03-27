@@ -1,0 +1,48 @@
+.nav-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2rem 1.5rem;
+    color: #f7f2ea;
+}
+
+.nav-header {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(247, 242, 234, 0.16);
+}
+
+.nav-kicker {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f6b86f;
+}
+
+.nav-copy {
+    margin: 0;
+    line-height: 1.6;
+    color: rgba(247, 242, 234, 0.76);
+}
+
+.nav-links {
+    display: grid;
+    gap: 0.65rem;
+    padding-top: 1.5rem;
+}
+
+.nav-link {
+    display: block;
+    padding: 0.85rem 1rem;
+    border-radius: 0.9rem;
+    color: #f7f2ea;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(216, 107, 43, 0.18);
+    transform: translateX(4px);
+}
