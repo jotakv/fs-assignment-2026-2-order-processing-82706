@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject CartState CartState
+@inject ILogger<MainLayout> Logger
 
 <div class="shell">
     <aside class="sidebar">
@@ -42,8 +43,16 @@
     {
         if (firstRender)
         {
-            await CartState.InitializeAsync();
-            StateHasChanged();
+            try
+            {
+                await CartState.InitializeAsync();
+                StateHasChanged();
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, "Cart state initialization failed during first render");
+                throw;
+            }
         }
     }
 
