@@ -3,6 +3,7 @@
   <PropertyGroup>
 	  <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -27,7 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SportsStore\SportsStore.csproj" />
+    <ProjectReference Include="..\SportsStore.Domain\SportsStore.Domain.csproj" />
+    <ProjectReference Include="..\SportsStore.Application\SportsStore.Application.csproj" />
+    <ProjectReference Include="..\SportsStore.Infrastructure\SportsStore.Infrastructure.csproj" />
+    <ProjectReference Include="..\SportsStore.Api\SportsStore.Api.csproj" />
   </ItemGroup>
 
 </Project>

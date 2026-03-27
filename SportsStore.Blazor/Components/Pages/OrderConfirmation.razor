@@ -1,0 +1,98 @@
+@page "/checkout/complete"
+@inject SportsStore.Blazor.Services.Api.OrdersApiClient OrdersApi
+@inject CartState CartState
+@inject RecentOrdersState RecentOrdersState
+
+<PageTitle>Order Confirmation</PageTitle>
+
+@if (_loading)
+{
+    <section class="page-card loading-state">Confirming payment and loading the order...</section>
+}
+else if (!string.IsNullOrWhiteSpace(_error))
+{
+    <section class="page-card error-state">@_error</section>
+}
+else if (_result is not null)
+{
+    <section class="page-card status-card">
+        <h1>Order confirmed</h1>
+        <p>Your order was saved only after Stripe reported the checkout session as paid.</p>
+
+        <div class="status-stack">
+            <div class="summary-row">
+                <span>Order ID</span>
+                <strong>#@_result.OrderID</strong>
+            </div>
+            <div class="summary-row">
+                <span>Payment status</span>
+                <span class="status-pill">@_result.PaymentStatus</span>
+            </div>
+            <div class="summary-row">
+                <span>Total amount</span>
+                <strong>@_result.TotalAmount.ToString("C")</strong>
+            </div>
+            <div class="summary-row">
+                <span>Item count</span>
+                <strong>@_result.ItemCount</strong>
+            </div>
+        </div>
+
+        <div class="status-actions">
+            <NavLink class="secondary-button" href="/orders">Recent orders</NavLink>
+            <NavLink class="action-button" href="@($"/orders/{_result.OrderID}")">Open order details</NavLink>
+        </div>
+    </section>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "session_id")]
+    public string? SessionId { get; set; }
+
+    [SupplyParameterFromQuery(Name = "pendingCheckoutId")]
+    public string? PendingCheckoutId { get; set; }
+
+    private bool _loading = true;
+    private string? _error;
+    private CheckoutCompletionDto? _result;
+    private bool _loaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _loaded)
+        {
+            return;
+        }
+
+        _loaded = true;
+
+        if (string.IsNullOrWhiteSpace(SessionId) || string.IsNullOrWhiteSpace(PendingCheckoutId))
+        {
+            _error = "The checkout return parameters are incomplete.";
+            _loading = false;
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            _result = await OrdersApi.CompleteAsync(new CompleteCheckoutCommand
+            {
+                SessionId = SessionId,
+                PendingCheckoutId = PendingCheckoutId
+            });
+
+            await CartState.ClearAsync();
+            await RecentOrdersState.AddAsync(_result.OrderID);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

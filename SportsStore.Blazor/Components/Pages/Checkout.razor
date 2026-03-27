@@ -1,0 +1,143 @@
+@page "/checkout"
+@inject CartState CartState
+@inject SportsStore.Blazor.Services.Api.OrdersApiClient OrdersApi
+@inject NavigationManager Navigation
+
+<PageTitle>Checkout</PageTitle>
+
+<section class="page-card page-hero">
+    <h1>Checkout</h1>
+    <p>
+        Shipping information is collected here, Stripe handles payment, and the API confirms the order only after the
+        payment session comes back as paid.
+    </p>
+</section>
+
+@if (_loading)
+{
+    <section class="page-card loading-state">Loading checkout form...</section>
+}
+else if (CartState.Items.Count == 0)
+{
+    <section class="page-card empty-state">There is nothing to check out yet.</section>
+}
+else
+{
+    <section class="page-card checkout-card">
+        <h2>Shipping details</h2>
+        <EditForm Model="_command" OnValidSubmit="BeginCheckoutAsync">
+            <DataAnnotationsValidator />
+
+            <div class="field-grid">
+                <label class="field-label">
+                    Name
+                    <InputText @bind-Value="_command.Name" />
+                    <ValidationMessage For="() => _command.Name" />
+                </label>
+
+                <label class="field-label">
+                    Country
+                    <InputText @bind-Value="_command.Country" />
+                    <ValidationMessage For="() => _command.Country" />
+                </label>
+
+                <label class="field-label full-width">
+                    Address line 1
+                    <InputText @bind-Value="_command.Line1" />
+                    <ValidationMessage For="() => _command.Line1" />
+                </label>
+
+                <label class="field-label full-width">
+                    Address line 2
+                    <InputText @bind-Value="_command.Line2" />
+                </label>
+
+                <label class="field-label">
+                    City
+                    <InputText @bind-Value="_command.City" />
+                    <ValidationMessage For="() => _command.City" />
+                </label>
+
+                <label class="field-label">
+                    State
+                    <InputText @bind-Value="_command.State" />
+                    <ValidationMessage For="() => _command.State" />
+                </label>
+
+                <label class="field-label">
+                    ZIP / postal code
+                    <InputText @bind-Value="_command.Zip" />
+                </label>
+
+                <label class="field-label">
+                    Gift wrap
+                    <InputCheckbox @bind-Value="_command.GiftWrap" />
+                </label>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <p class="validation-message">@_error</p>
+            }
+
+            <div class="summary-panel">
+                <div class="summary-row">
+                    <span>Total items</span>
+                    <strong>@CartState.ItemCount</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Total amount</span>
+                    <strong>@CartState.TotalAmount.ToString("C")</strong>
+                </div>
+                <div class="status-actions">
+                    <NavLink class="secondary-button" href="/cart">Back to cart</NavLink>
+                    <button class="action-button" type="submit" disabled="@_submitting">
+                        @(_submitting ? "Redirecting..." : "Pay with Stripe")
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    </section>
+}
+
+@code {
+    private readonly CheckoutOrderCommand _command = new();
+    private bool _loading = true;
+    private bool _submitting;
+    private string? _error;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CartState.InitializeAsync();
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task BeginCheckoutAsync()
+    {
+        _submitting = true;
+        _error = null;
+
+        try
+        {
+            _command.Lines = CartState.Items
+                .Select(item => new CheckoutLineItemDto
+                {
+                    ProductID = item.ProductID,
+                    Quantity = item.Quantity
+                })
+                .ToList();
+
+            CheckoutSessionDto session = await OrdersApi.CheckoutAsync(_command);
+            Navigation.NavigateTo(session.CheckoutUrl, forceLoad: true);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+            _submitting = false;
+        }
+    }
+}

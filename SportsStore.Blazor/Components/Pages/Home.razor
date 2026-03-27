@@ -1,0 +1,147 @@
+@page "/"
+@inject SportsStore.Blazor.Services.Api.CatalogApiClient CatalogApi
+@inject NavigationManager Navigation
+@inject CartState CartState
+
+<PageTitle>SportsStore Catalog</PageTitle>
+
+<section class="page-card page-hero">
+    <h1>Sports equipment without the monolith.</h1>
+    <p>
+        The catalog now comes from the API through cached MediatR queries. Product behavior stays familiar:
+        category filter, four-item paging, and the same seed inventory.
+    </p>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <section class="page-card error-state">@_error</section>
+}
+else if (_loading)
+{
+    <section class="page-card loading-state">Loading catalog...</section>
+}
+else
+{
+    <section class="catalog-layout">
+        <aside class="page-card filters">
+            <p class="section-title">Categories</p>
+            <div class="filter-stack">
+                <button class="filter-button @(string.IsNullOrWhiteSpace(Category) ? "active" : string.Empty)"
+                        @onclick="() => NavigateCatalog(null, 1)">
+                    All Products
+                </button>
+
+                @foreach (string category in _categories)
+                {
+                    <button class="filter-button @(Category == category ? "active" : string.Empty)"
+                            @onclick="() => NavigateCatalog(category, 1)">
+                        @category
+                    </button>
+                }
+            </div>
+        </aside>
+
+        <div class="page-card catalog-results">
+            <div class="pagination-row">
+                <div>
+                    <p class="section-title">Catalog</p>
+                    <p>@_catalog.Pagination.TotalItems item(s) in @(Category ?? "all categories").</p>
+                </div>
+                <div class="price-row">
+                    <button class="secondary-button"
+                            disabled="@(_catalog.Pagination.CurrentPage <= 1)"
+                            @onclick="() => NavigateCatalog(Category, _catalog.Pagination.CurrentPage - 1)">
+                        Previous
+                    </button>
+                    <span>Page @_catalog.Pagination.CurrentPage of @_catalog.Pagination.TotalPages</span>
+                    <button class="secondary-button"
+                            disabled="@(_catalog.Pagination.CurrentPage >= _catalog.Pagination.TotalPages)"
+                            @onclick="() => NavigateCatalog(Category, _catalog.Pagination.CurrentPage + 1)">
+                        Next
+                    </button>
+                </div>
+            </div>
+
+            @if (_catalog.Products.Count == 0)
+            {
+                <div class="empty-state">No products are available for this category.</div>
+            }
+            else
+            {
+                <div class="catalog-grid">
+                    @foreach (ProductDto product in _catalog.Products)
+                    {
+                        <article class="product-card">
+                            <span class="category-pill">@product.Category</span>
+                            <h2>@product.Name</h2>
+                            <p>@product.Description</p>
+                            <div class="price-row">
+                                <span class="price-pill">@product.Price.ToString("C")</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="action-button" @onclick="() => AddToCartAsync(product)">Add to cart</button>
+                                <NavLink class="secondary-button" href="@($"/products/{product.ProductID}")">Details</NavLink>
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "category")]
+    public string? Category { get; set; }
+
+    [SupplyParameterFromQuery(Name = "page")]
+    public int? ProductPage { get; set; }
+
+    private readonly int _pageSize = 4;
+    private PagedProductsDto _catalog = new();
+    private IReadOnlyList<string> _categories = [];
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _error = null;
+
+        try
+        {
+            int page = ProductPage.GetValueOrDefault(1);
+            _catalog = await CatalogApi.GetProductsAsync(Category, page, _pageSize);
+            _categories = await CatalogApi.GetCategoriesAsync();
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void NavigateCatalog(string? category, int page)
+    {
+        List<string> queryParts = [];
+
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            queryParts.Add($"category={Uri.EscapeDataString(category)}");
+        }
+
+        if (page > 1)
+        {
+            queryParts.Add($"page={page}");
+        }
+
+        string target = queryParts.Count == 0 ? "/" : $"/?{string.Join("&", queryParts)}";
+        Navigation.NavigateTo(target);
+    }
+
+    private Task AddToCartAsync(ProductDto product) => CartState.AddAsync(product);
+}

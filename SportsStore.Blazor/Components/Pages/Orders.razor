@@ -1,0 +1,85 @@
+@page "/orders"
+@inject SportsStore.Blazor.Services.Api.OrdersApiClient OrdersApi
+@inject RecentOrdersState RecentOrdersState
+
+<PageTitle>Recent Orders</PageTitle>
+
+<section class="page-card page-hero">
+    <h1>Recent orders</h1>
+    <p>This view tracks orders completed from this browser session and reloads their details from the API.</p>
+</section>
+
+@if (_loading)
+{
+    <section class="page-card loading-state">Loading recent orders...</section>
+}
+else if (!string.IsNullOrWhiteSpace(_error))
+{
+    <section class="page-card error-state">@_error</section>
+}
+else if (_orders.Count == 0)
+{
+    <section class="page-card empty-state">No recent orders are stored for this browser session yet.</section>
+}
+else
+{
+    <section class="page-card orders-card">
+        <h2>Tracked orders</h2>
+
+        @foreach (OrderDto order in _orders)
+        {
+            <article class="order-card">
+                <div class="price-row">
+                    <strong>Order #@order.OrderID</strong>
+                    <span class="status-pill">@((order.StripePaymentStatus ?? "unknown").ToUpperInvariant())</span>
+                </div>
+                <p>@order.Name, @order.City, @order.Country</p>
+                <div class="summary-row">
+                    <span>@order.ItemCount item(s)</span>
+                    <strong>@order.TotalAmount.ToString("C")</strong>
+                </div>
+                <div class="status-actions">
+                    <NavLink class="secondary-button" href="@($"/orders/{order.OrderID}")">View details</NavLink>
+                </div>
+            </article>
+        }
+    </section>
+}
+
+@code {
+    private readonly List<OrderDto> _orders = [];
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            await RecentOrdersState.InitializeAsync();
+            _orders.Clear();
+
+            foreach (int orderId in RecentOrdersState.OrderIds)
+            {
+                OrderDto? order = await OrdersApi.GetOrderAsync(orderId);
+                if (order is not null)
+                {
+                    _orders.Add(order);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+}

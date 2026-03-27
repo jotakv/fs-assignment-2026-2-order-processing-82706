@@ -1,0 +1,70 @@
+@page "/products/{ProductId:long}"
+@inject SportsStore.Blazor.Services.Api.CatalogApiClient CatalogApi
+@inject CartState CartState
+
+<PageTitle>Product Details</PageTitle>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <section class="page-card error-state">@_error</section>
+}
+else if (_loading)
+{
+    <section class="page-card loading-state">Loading product details...</section>
+}
+else if (_product is null)
+{
+    <section class="page-card empty-state">That product could not be found.</section>
+}
+else
+{
+    <section class="page-card detail-card">
+        <span class="category-pill">@_product.Category</span>
+        <h1>@_product.Name</h1>
+        <p>@_product.Description</p>
+
+        <div class="detail-meta">
+            <div class="summary-row">
+                <span>Price</span>
+                <strong>@_product.Price.ToString("C")</strong>
+            </div>
+            <div class="summary-row">
+                <span>Category</span>
+                <strong>@_product.Category</strong>
+            </div>
+        </div>
+
+        <div class="status-actions">
+            <button class="action-button" @onclick="() => CartState.AddAsync(_product)">Add to cart</button>
+            <NavLink class="secondary-button" href="">Back to catalog</NavLink>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public long ProductId { get; set; }
+
+    private ProductDto? _product;
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _error = null;
+
+        try
+        {
+            _product = await CatalogApi.GetProductAsync(ProductId);
+        }
+        catch (Exception exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}
