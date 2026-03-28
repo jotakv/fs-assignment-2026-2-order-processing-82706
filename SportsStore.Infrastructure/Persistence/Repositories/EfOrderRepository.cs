@@ -19,6 +19,20 @@ public sealed class EfOrderRepository : IOrderRepository
             .ThenByDescending(order => order.OrderID)
             .ToListAsync(cancellationToken);
 
+    public Task<IReadOnlyList<Order>> GetByCustomerIdAsync(int customerId, CancellationToken cancellationToken) =>
+        OrdersQuery()
+            .Where(order => order.CustomerId == customerId)
+            .OrderByDescending(order => order.CreatedAtUtc)
+            .ToListAsync(cancellationToken)
+            .ContinueWith(task => (IReadOnlyList<Order>)task.Result, cancellationToken);
+
+    public Task<IReadOnlyList<Order>> GetByStatusAsync(OrderStatus status, CancellationToken cancellationToken) =>
+        OrdersQuery()
+            .Where(order => order.Status == status)
+            .OrderByDescending(order => order.CreatedAtUtc)
+            .ToListAsync(cancellationToken)
+            .ContinueWith(task => (IReadOnlyList<Order>)task.Result, cancellationToken);
+
     public Task<Order?> GetByIdAsync(int orderId, CancellationToken cancellationToken) =>
         OrdersQuery().FirstOrDefaultAsync(order => order.OrderID == orderId, cancellationToken);
 
