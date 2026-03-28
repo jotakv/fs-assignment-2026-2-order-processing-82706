@@ -77,7 +77,17 @@
 - branch name: feat/07-order-status-tracking
 - agent markdown path: .cloudbot/agents/07-order-status-tracking.md
 - status: completed
+- commit hash: 06c243ef1c4e3ca5f8cfcc9dcce8f4a40955ff6c
+- PR link or identifier: PR #9
+- merge result: merged
+- short note: Completed order traceability by exposing timeline/failure details in the status API and making worker terminal states consistent for Completed/Failed outcomes.
+
+- story filename: backlog/08-feat-blazor-customer-portal.md
+- story slug: 08-blazor-customer-portal
+- branch name: feat/08-blazor-customer-portal
+- agent markdown path: .cloudbot/agents/08-blazor-customer-portal.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Completed order traceability by exposing timeline/failure details in the status API and making worker terminal states consistent for Completed/Failed outcomes.
+- short note: Completed the Blazor customer portal by wiring API-based order status tracking into confirmation/recent orders/details pages and adding focused API client tests.

@@ -18,7 +18,7 @@ else if (_order is null)
 else
 {
     <section class="page-card detail-card">
-        <span class="status-pill">@(_order.StripePaymentStatus ?? "unknown")</span>
+        <span class="status-pill">@(_status?.Status ?? _order.StripePaymentStatus ?? "unknown")</span>
         <h1>Order #@_order.OrderID</h1>
         <p>@_order.Name, @_order.Line1, @_order.City, @_order.Country</p>
 
@@ -39,6 +39,20 @@ else
                 <span>Shipping status</span>
                 <strong>@(_order.Shipped ? "Shipped" : "Awaiting shipment")</strong>
             </div>
+            @if (_status is not null)
+            {
+                <div class="summary-row">
+                    <span>Last event</span>
+                    <strong>@(_status.LastEvent ?? "OrderCreated")</strong>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(_status.FailureReason))
+                {
+                    <div class="summary-row">
+                        <span>Failure reason</span>
+                        <strong>@_status.FailureReason</strong>
+                    </div>
+                }
+            }
         </div>
 
         <div class="summary-panel">
@@ -50,6 +64,24 @@ else
                 </div>
             }
         </div>
+
+        @if (_status?.Timeline?.Count > 0)
+        {
+            <section class="summary-panel">
+                <h2>Tracking timeline</h2>
+                @foreach (OrderStatusTimelineEntryDto entry in _status.Timeline)
+                {
+                    <div class="order-line">
+                        <span>@entry.EventType (@entry.Status)</span>
+                        <strong>@entry.OccurredAtUtc.ToLocalTime().ToString("g")</strong>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(entry.Detail))
+                    {
+                        <p>@entry.Detail</p>
+                    }
+                }
+            </section>
+        }
     </section>
 }
 
@@ -58,6 +90,7 @@ else
     public int OrderId { get; set; }
 
     private OrderDto? _order;
+    private OrderStatusDto? _status;
     private bool _loading = true;
     private string? _error;
 
@@ -69,6 +102,7 @@ else
         try
         {
             _order = await OrdersApi.GetOrderAsync(OrderId);
+            _status = await OrdersApi.GetOrderStatusAsync(OrderId);
         }
         catch (Exception exception)
         {

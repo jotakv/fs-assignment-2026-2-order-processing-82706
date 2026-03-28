@@ -36,6 +36,18 @@ public sealed class OrdersApiClient
         return await ReadResponseAsync<OrderDto>(response);
     }
 
+    public async Task<OrderStatusDto?> GetOrderStatusAsync(int orderId)
+    {
+        HttpResponseMessage response = await _httpClient.GetAsync($"api/orders/{orderId}/status");
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        return await ReadResponseAsync<OrderStatusDto>(response);
+    }
+
     private static async Task<T> ReadResponseAsync<T>(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)

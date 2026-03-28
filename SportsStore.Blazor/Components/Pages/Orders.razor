@@ -26,20 +26,27 @@ else
     <section class="page-card orders-card">
         <h2>Tracked orders</h2>
 
-        @foreach (OrderDto order in _orders)
+        @foreach (TrackedOrderViewModel order in _orders)
         {
             <article class="order-card">
                 <div class="price-row">
-                    <strong>Order #@order.OrderID</strong>
-                    <span class="status-pill">@((order.StripePaymentStatus ?? "unknown").ToUpperInvariant())</span>
+                    <strong>Order #@order.Order.OrderID</strong>
+                    <span class="status-pill">@(order.Status?.Status ?? (order.Order.StripePaymentStatus ?? "unknown").ToUpperInvariant())</span>
                 </div>
-                <p>@order.Name, @order.City, @order.Country</p>
+                <p>@order.Order.Name, @order.Order.City, @order.Order.Country</p>
                 <div class="summary-row">
-                    <span>@order.ItemCount item(s)</span>
-                    <strong>@order.TotalAmount.ToString("C")</strong>
+                    <span>@order.Order.ItemCount item(s)</span>
+                    <strong>@order.Order.TotalAmount.ToString("C")</strong>
                 </div>
+                @if (order.Status is not null)
+                {
+                    <div class="summary-row">
+                        <span>Last event</span>
+                        <strong>@(order.Status.LastEvent ?? "OrderCreated")</strong>
+                    </div>
+                }
                 <div class="status-actions">
-                    <NavLink class="secondary-button" href="@($"/orders/{order.OrderID}")">View details</NavLink>
+                    <NavLink class="secondary-button" href="@($"/orders/{order.Order.OrderID}")">View details</NavLink>
                 </div>
             </article>
         }
@@ -47,7 +54,7 @@ else
 }
 
 @code {
-    private readonly List<OrderDto> _orders = [];
+    private readonly List<TrackedOrderViewModel> _orders = [];
     private bool _loading = true;
     private string? _error;
 
@@ -68,7 +75,8 @@ else
                 OrderDto? order = await OrdersApi.GetOrderAsync(orderId);
                 if (order is not null)
                 {
-                    _orders.Add(order);
+                    OrderStatusDto? status = await OrdersApi.GetOrderStatusAsync(orderId);
+                    _orders.Add(new TrackedOrderViewModel(order, status));
                 }
             }
         }
@@ -82,4 +90,6 @@ else
             StateHasChanged();
         }
     }
+
+    private sealed record TrackedOrderViewModel(OrderDto Order, OrderStatusDto? Status);
 }
