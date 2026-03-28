@@ -26,6 +26,10 @@ public sealed class OrderDto
 
     public bool Shipped { get; set; }
 
+    public string Status { get; set; } = string.Empty;
+
+    public int? CustomerId { get; set; }
+
     public string? StripeSessionId { get; set; }
 
     public string? StripePaymentIntentId { get; set; }

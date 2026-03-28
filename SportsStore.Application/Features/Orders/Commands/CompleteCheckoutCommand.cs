@@ -65,6 +65,23 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
             throw new ValidationException("One or more products could not be found.");
         }
 
+        DateTime createdAtUtc = DateTime.UtcNow;
+
+        var orderItems = pendingCheckout.Lines
+            .Join(
+                products,
+                line => line.ProductID,
+                product => product.ProductID,
+                (line, product) => new OrderItem
+                {
+                    Product = product,
+                    ProductId = product.ProductID,
+                    Quantity = line.Quantity,
+                    UnitPrice = product.Price,
+                    LineTotal = product.Price * line.Quantity
+                })
+            .ToArray();
+
         var order = new Order
         {
             Name = pendingCheckout.ShippingDetails.Name,
@@ -76,21 +93,48 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
             Zip = pendingCheckout.ShippingDetails.Zip,
             Country = pendingCheckout.ShippingDetails.Country,
             GiftWrap = pendingCheckout.ShippingDetails.GiftWrap,
+            Status = OrderStatus.PaymentApproved,
             StripeSessionId = session.SessionId,
             StripePaymentIntentId = session.PaymentIntentId,
             StripePaymentStatus = session.PaymentStatus,
-            PaidAtUtc = DateTime.UtcNow,
-            Lines = pendingCheckout.Lines
-                .Join(
-                    products,
-                    line => line.ProductID,
-                    product => product.ProductID,
-                    (line, product) => new CartLine
-                    {
-                        Product = product,
-                        Quantity = line.Quantity
-                    })
-                .ToArray()
+            CreatedAtUtc = createdAtUtc,
+            UpdatedAtUtc = createdAtUtc,
+            PaidAtUtc = createdAtUtc,
+            Customer = new Customer
+            {
+                Name = pendingCheckout.ShippingDetails.Name ?? "Guest Customer",
+                Email = pendingCheckout.CustomerEmail,
+                CreatedAtUtc = createdAtUtc
+            },
+            PaymentRecords =
+            [
+                new PaymentRecord
+                {
+                    Provider = "Stripe",
+                    ExternalPaymentId = session.PaymentIntentId,
+                    Status = session.PaymentStatus,
+                    ProcessedAtUtc = createdAtUtc
+                }
+            ],
+            InventoryRecords =
+            [
+                new InventoryRecord
+                {
+                    Succeeded = false
+                }
+            ],
+            ShipmentRecords =
+            [
+                new ShipmentRecord()
+            ],
+            Lines = orderItems
+                .Select(item => new CartLine
+                {
+                    Product = item.Product,
+                    Quantity = item.Quantity
+                })
+                .ToArray(),
+            Items = orderItems
         };
 
         Order savedOrder = await _orderRepository.AddAsync(order, cancellationToken);

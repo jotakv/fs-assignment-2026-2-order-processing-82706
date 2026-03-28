@@ -18,8 +18,13 @@ public sealed class StoreMappingProfile : Profile
             .ForMember(dest => dest.LineTotal, opt => opt.MapFrom(src => src.Product.Price * src.Quantity));
 
         CreateMap<Order, OrderDto>()
-            .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => src.Lines.Sum(line => line.Product.Price * line.Quantity)))
-            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Lines.Sum(line => line.Quantity)));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => src.Items.Count != 0
+                ? src.Items.Sum(item => item.LineTotal)
+                : src.Lines.Sum(line => line.Product.Price * line.Quantity)))
+            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count != 0
+                ? src.Items.Sum(item => item.Quantity)
+                : src.Lines.Sum(line => line.Quantity)));
 
         CreateMap<CreateProductCommand, Product>()
             .ForMember(dest => dest.ProductID, opt => opt.Ignore());
