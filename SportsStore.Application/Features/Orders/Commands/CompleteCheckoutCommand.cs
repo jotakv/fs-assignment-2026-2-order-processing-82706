@@ -1,8 +1,10 @@
 using MediatR;
 using SportsStore.Application.Abstractions.Checkout;
+using SportsStore.Application.Abstractions.Messaging;
 using SportsStore.Application.Abstractions.Payments;
 using SportsStore.Application.Abstractions.Persistence;
 using SportsStore.Application.Common.Dtos;
+using SportsStore.Application.Contracts.Messaging;
 using SportsStore.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -23,17 +25,20 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
     private readonly IProductRepository _productRepository;
     private readonly IPaymentService _paymentService;
     private readonly IPendingCheckoutStore _pendingCheckoutStore;
+    private readonly IOrderEventPublisher _orderEventPublisher;
 
     public CompleteCheckoutCommandHandler(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
         IPaymentService paymentService,
-        IPendingCheckoutStore pendingCheckoutStore)
+        IPendingCheckoutStore pendingCheckoutStore,
+        IOrderEventPublisher orderEventPublisher)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _paymentService = paymentService;
         _pendingCheckoutStore = pendingCheckoutStore;
+        _orderEventPublisher = orderEventPublisher;
     }
 
     public async Task<CheckoutCompletionDto> Handle(CompleteCheckoutCommand request, CancellationToken cancellationToken)
@@ -138,6 +143,34 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
         };
 
         Order savedOrder = await _orderRepository.AddAsync(order, cancellationToken);
+
+        await _orderEventPublisher.PublishOrderSubmittedAsync(
+            new OrderSubmittedIntegrationEvent
+            {
+                OrderId = savedOrder.OrderID,
+                CustomerId = savedOrder.CustomerId,
+                CorrelationId = request.SessionId,
+                Status = savedOrder.Status.ToString(),
+                OccurredAtUtc = DateTime.UtcNow,
+                TotalAmount = savedOrder.Items.Count != 0
+                    ? savedOrder.Items.Sum(item => item.LineTotal)
+                    : savedOrder.Lines.Sum(line => line.Quantity * line.Product.Price),
+                Items = savedOrder.Items.Count != 0
+                    ? savedOrder.Items.Select(item => new OrderSubmittedLineItem
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    }).ToArray()
+                    : savedOrder.Lines.Select(line => new OrderSubmittedLineItem
+                    {
+                        ProductId = line.Product.ProductID,
+                        Quantity = line.Quantity,
+                        UnitPrice = line.Product.Price
+                    }).ToArray()
+            },
+            cancellationToken);
+
         await _pendingCheckoutStore.RemoveAsync(request.PendingCheckoutId, cancellationToken);
 
         return MapCompletion(savedOrder);

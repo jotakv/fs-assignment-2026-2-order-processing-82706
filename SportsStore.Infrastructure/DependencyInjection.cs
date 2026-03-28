@@ -3,10 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SportsStore.Application.Abstractions.Caching;
 using SportsStore.Application.Abstractions.Checkout;
+using SportsStore.Application.Abstractions.Messaging;
 using SportsStore.Application.Abstractions.Payments;
 using SportsStore.Application.Abstractions.Persistence;
 using SportsStore.Infrastructure.Caching;
 using SportsStore.Infrastructure.Checkout;
+using SportsStore.Infrastructure.Messaging;
 using SportsStore.Infrastructure.Options;
 using SportsStore.Infrastructure.Payments;
 using SportsStore.Infrastructure.Persistence;
@@ -22,6 +24,7 @@ public static class DependencyInjection
 
         services.Configure<ClientAppOptions>(configuration.GetSection(ClientAppOptions.SectionName));
         services.Configure<StripeOptions>(configuration.GetSection(StripeOptions.SectionName));
+        services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
 
         services.AddDbContext<StoreDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("SportsStoreConnection")));
@@ -35,6 +38,7 @@ public static class DependencyInjection
         services.AddSingleton<IPendingCheckoutStore, InMemoryPendingCheckoutStore>();
         services.AddSingleton<ICheckoutUrlFactory, ConfigurationCheckoutUrlFactory>();
         services.AddScoped<IPaymentService, StripePaymentService>();
+        services.AddScoped<IOrderEventPublisher, RabbitMqOrderEventPublisher>();
 
         return services;
     }
