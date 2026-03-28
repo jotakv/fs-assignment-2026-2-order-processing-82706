@@ -33,6 +33,7 @@
     <ProjectReference Include="..\SportsStore.Infrastructure\SportsStore.Infrastructure.csproj" />
     <ProjectReference Include="..\SportsStore.Api\SportsStore.Api.csproj" />
     <ProjectReference Include="..\SportsStore.Inventory.Worker\SportsStore.Inventory.Worker.csproj" />
+    <ProjectReference Include="..\SportsStore.Payment.Worker\SportsStore.Payment.Worker.csproj" />
   </ItemGroup>
 
 </Project>
