@@ -47,7 +47,17 @@
 - branch name: feat/04-inventory-service
 - agent markdown path: .cloudbot/agents/04-inventory-service.md
 - status: completed
+- commit hash: 2bc2fbf9632f279be7f8c96240112d5d985e83a0
+- PR link or identifier: PR #6
+- merge result: merged
+- short note: Added inventory worker project that consumes OrderSubmitted, simulates stock validation, persists InventoryRecord results, and publishes InventoryConfirmed/InventoryFailed.
+
+- story filename: backlog/05-feat-payment-service.md
+- story slug: 05-payment-service
+- branch name: feat/05-payment-service
+- agent markdown path: .cloudbot/agents/05-payment-service.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Added inventory worker project that consumes OrderSubmitted, simulates stock validation, persists InventoryRecord results, and publishes InventoryConfirmed/InventoryFailed.
+- short note: Added payment worker project that consumes InventoryConfirmed, applies deterministic payment rules, persists PaymentRecord results, and publishes PaymentApproved/PaymentRejected.
