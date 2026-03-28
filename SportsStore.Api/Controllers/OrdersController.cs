@@ -50,6 +50,15 @@ public sealed class OrdersController : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
+    [HttpGet("{orderId:int}/admin")]
+    [ProducesResponseType<AdminOrderDetailsDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AdminOrderDetailsDto>> GetAdminOrderDetails(int orderId, CancellationToken cancellationToken = default)
+    {
+        AdminOrderDetailsDto? result = await _sender.Send(new GetAdminOrderDetailsQuery(orderId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
     [HttpPost("checkout")]
     [ProducesResponseType<CheckoutSessionDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -87,7 +87,17 @@
 - branch name: feat/08-blazor-customer-portal
 - agent markdown path: .cloudbot/agents/08-blazor-customer-portal.md
 - status: completed
+- commit hash: 243e95ea38ee6e44e37475fcb219d6375e8621a5
+- PR link or identifier: PR #10
+- merge result: merged
+- short note: Completed the Blazor customer portal by wiring API-based order status tracking into confirmation/recent orders/details pages and adding focused API client tests.
+
+- story filename: backlog/09-feat-react-admin-dashboard.md
+- story slug: 09-react-admin-dashboard
+- branch name: feat/09-react-admin-dashboard
+- agent markdown path: .cloudbot/agents/09-react-admin-dashboard.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Completed the Blazor customer portal by wiring API-based order status tracking into confirmation/recent orders/details pages and adding focused API client tests.
+- short note: Added a separate React admin dashboard with orders table, status filters, failed orders screen, and operational order details powered by existing API endpoints.
