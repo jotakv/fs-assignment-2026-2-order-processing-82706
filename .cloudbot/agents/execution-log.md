@@ -57,7 +57,17 @@
 - branch name: feat/05-payment-service
 - agent markdown path: .cloudbot/agents/05-payment-service.md
 - status: completed
+- commit hash: 0d763c56952a360668fd33ef47541e6a1801c477
+- PR link or identifier: PR #7
+- merge result: merged
+- short note: Added payment worker project that consumes InventoryConfirmed, applies deterministic payment rules, persists PaymentRecord results, and publishes PaymentApproved/PaymentRejected.
+
+- story filename: backlog/06-feat-shipping-service.md
+- story slug: 06-shipping-service
+- branch name: feat/06-shipping-service
+- agent markdown path: .cloudbot/agents/06-shipping-service.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Added payment worker project that consumes InventoryConfirmed, applies deterministic payment rules, persists PaymentRecord results, and publishes PaymentApproved/PaymentRejected.
+- short note: Added shipping worker project that consumes PaymentApproved, creates shipment/tracking data, persists ShipmentRecord results, and publishes ShippingCreated/ShippingFailed.

@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IOrderEventPublisher, RabbitMqOrderEventPublisher>();
         services.AddScoped<IInventoryEventPublisher, RabbitMqInventoryEventPublisher>();
         services.AddScoped<IPaymentEventPublisher, RabbitMqPaymentEventPublisher>();
+        services.AddScoped<IShippingEventPublisher, RabbitMqShippingEventPublisher>();
 
         return services;
     }

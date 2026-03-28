@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsStore.Inventory.Worke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsStore.Payment.Worker", "SportsStore.Payment.Worker\SportsStore.Payment.Worker.csproj", "{81F58E7F-B1FA-4C38-BD76-8B504327C28A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsStore.Shipping.Worker", "SportsStore.Shipping.Worker\SportsStore.Shipping.Worker.csproj", "{298088B0-155B-4757-A0D3-7F2F4EC4CE89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,18 @@ Global
 		{81F58E7F-B1FA-4C38-BD76-8B504327C28A}.Release|x64.Build.0 = Release|Any CPU
 		{81F58E7F-B1FA-4C38-BD76-8B504327C28A}.Release|x86.ActiveCfg = Release|Any CPU
 		{81F58E7F-B1FA-4C38-BD76-8B504327C28A}.Release|x86.Build.0 = Release|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Debug|x64.Build.0 = Debug|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Debug|x86.Build.0 = Debug|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Release|x64.ActiveCfg = Release|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Release|x64.Build.0 = Release|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Release|x86.ActiveCfg = Release|Any CPU
+		{298088B0-155B-4757-A0D3-7F2F4EC4CE89}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
