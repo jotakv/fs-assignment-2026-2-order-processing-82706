@@ -106,8 +106,12 @@ public sealed class PaymentInventoryConfirmedWorker : BackgroundService
         };
 
         order.PaymentRecords.Add(record);
-        order.Status = decision.Approved ? OrderStatus.PaymentApproved : OrderStatus.PaymentFailed;
+        order.Status = decision.Approved ? OrderStatus.PaymentApproved : OrderStatus.Failed;
         order.UpdatedAtUtc = DateTime.UtcNow;
+        if (!decision.Approved)
+        {
+            order.FailedAtUtc = DateTime.UtcNow;
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

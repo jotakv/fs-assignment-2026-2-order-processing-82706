@@ -67,7 +67,17 @@
 - branch name: feat/06-shipping-service
 - agent markdown path: .cloudbot/agents/06-shipping-service.md
 - status: completed
+- commit hash: e2b680bb29091fae7d688668fa7b1cbc479c89e8
+- PR link or identifier: PR #8
+- merge result: merged
+- short note: Added shipping worker project that consumes PaymentApproved, creates shipment/tracking data, persists ShipmentRecord results, and publishes ShippingCreated/ShippingFailed.
+
+- story filename: backlog/07-feat-order-status-tracking.md
+- story slug: 07-order-status-tracking
+- branch name: feat/07-order-status-tracking
+- agent markdown path: .cloudbot/agents/07-order-status-tracking.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Added shipping worker project that consumes PaymentApproved, creates shipment/tracking data, persists ShipmentRecord results, and publishes ShippingCreated/ShippingFailed.
+- short note: Completed order traceability by exposing timeline/failure details in the status API and making worker terminal states consistent for Completed/Failed outcomes.

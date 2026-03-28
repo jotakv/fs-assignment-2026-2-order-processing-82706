@@ -105,8 +105,12 @@ public sealed class InventoryOrderSubmittedWorker : BackgroundService
         };
 
         order.InventoryRecords.Add(record);
-        order.Status = decision.Succeeded ? OrderStatus.InventoryConfirmed : OrderStatus.InventoryFailed;
+        order.Status = decision.Succeeded ? OrderStatus.InventoryConfirmed : OrderStatus.Failed;
         order.UpdatedAtUtc = DateTime.UtcNow;
+        if (!decision.Succeeded)
+        {
+            order.FailedAtUtc = DateTime.UtcNow;
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
