@@ -27,4 +27,10 @@ public sealed class RabbitMqOptions
     public string PaymentRejectedRoutingKey { get; set; } = "payment.rejected";
 
     public string PaymentQueueName { get; set; } = "sportsstore.payment";
+
+    public string ShippingCreatedRoutingKey { get; set; } = "shipping.created";
+
+    public string ShippingFailedRoutingKey { get; set; } = "shipping.failed";
+
+    public string ShippingQueueName { get; set; } = "sportsstore.shipping";
 }
