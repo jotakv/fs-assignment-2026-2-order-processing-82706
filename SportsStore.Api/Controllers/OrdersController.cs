@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SportsStore.Application.Common.Dtos;
 using SportsStore.Application.Features.Orders.Commands;
 using SportsStore.Application.Features.Orders.Queries;
+using SportsStore.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace SportsStore.Api.Controllers;
@@ -20,9 +21,14 @@ public sealed class OrdersController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType<IReadOnlyList<OrderDto>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrders(CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IReadOnlyList<OrderDto>>> GetOrders(
+        [FromQuery] OrderStatus? status,
+        CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<OrderDto> result = await _sender.Send(new GetOrdersQuery(), cancellationToken);
+        IReadOnlyList<OrderDto> result = status is null
+            ? await _sender.Send(new GetOrdersQuery(), cancellationToken)
+            : await _sender.Send(new GetOrdersByStatusQuery(status.Value), cancellationToken);
+
         return Ok(result);
     }
 
@@ -32,6 +38,15 @@ public sealed class OrdersController : ControllerBase
     public async Task<ActionResult<OrderDto>> GetOrderById(int orderId, CancellationToken cancellationToken = default)
     {
         OrderDto? result = await _sender.Send(new GetOrderByIdQuery(orderId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("{orderId:int}/status")]
+    [ProducesResponseType<OrderStatusDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OrderStatusDto>> GetOrderStatus(int orderId, CancellationToken cancellationToken = default)
+    {
+        OrderStatusDto? result = await _sender.Send(new GetOrderStatusQuery(orderId), cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 
