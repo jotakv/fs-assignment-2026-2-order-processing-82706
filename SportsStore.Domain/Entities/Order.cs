@@ -6,7 +6,19 @@ public class Order
 {
     public int OrderID { get; set; }
 
+    public int? CustomerId { get; set; }
+
+    public Customer? Customer { get; set; }
+
     public ICollection<CartLine> Lines { get; set; } = new List<CartLine>();
+
+    public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+
+    public ICollection<InventoryRecord> InventoryRecords { get; set; } = new List<InventoryRecord>();
+
+    public ICollection<PaymentRecord> PaymentRecords { get; set; } = new List<PaymentRecord>();
+
+    public ICollection<ShipmentRecord> ShipmentRecords { get; set; } = new List<ShipmentRecord>();
 
     [Required(ErrorMessage = "Please enter a name")]
     public string? Name { get; set; }
@@ -33,11 +45,21 @@ public class Order
 
     public bool Shipped { get; set; }
 
+    public OrderStatus Status { get; set; } = OrderStatus.Submitted;
+
     public string? StripeSessionId { get; set; }
 
     public string? StripePaymentIntentId { get; set; }
 
     public string? StripePaymentStatus { get; set; }
 
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+
     public DateTime? PaidAtUtc { get; set; }
+
+    public DateTime? CompletedAtUtc { get; set; }
+
+    public DateTime? FailedAtUtc { get; set; }
 }

@@ -28,6 +28,12 @@ public sealed class EfOrderRepository : IOrderRepository
     public async Task<Order> AddAsync(Order order, CancellationToken cancellationToken)
     {
         _context.AttachRange(order.Lines.Select(line => line.Product));
+
+        foreach (OrderItem item in order.Items.Where(item => item.Product is not null))
+        {
+            _context.Attach(item.Product);
+        }
+
         _context.Orders.Add(order);
         await _context.SaveChangesAsync(cancellationToken);
         return order;
@@ -43,6 +49,9 @@ public sealed class EfOrderRepository : IOrderRepository
         }
 
         order.Shipped = true;
+        order.Status = OrderStatus.Completed;
+        order.CompletedAtUtc ??= DateTime.UtcNow;
+        order.UpdatedAtUtc = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
@@ -50,6 +59,12 @@ public sealed class EfOrderRepository : IOrderRepository
     private IQueryable<Order> OrdersQuery() =>
         _context.Orders
             .AsNoTracking()
+            .Include(order => order.Customer)
             .Include(order => order.Lines)
-            .ThenInclude(line => line.Product);
+            .ThenInclude(line => line.Product)
+            .Include(order => order.Items)
+            .ThenInclude(item => item.Product)
+            .Include(order => order.InventoryRecords)
+            .Include(order => order.PaymentRecords)
+            .Include(order => order.ShipmentRecords);
 }
