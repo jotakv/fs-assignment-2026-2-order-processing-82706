@@ -27,7 +27,17 @@
 - branch name: feat/02-api-cqrs-foundation
 - agent markdown path: .cloudbot/agents/02-api-cqrs-foundation.md
 - status: completed
+- commit hash: b1aac9e19aa2f59c25be65932417a0c47fc863ce
+- PR link or identifier: PR #4
+- merge result: merged
+- short note: Completed missing order CQRS queries/endpoints while preserving existing product caching and MediatR foundation.
+
+- story filename: backlog/03-feat-rabbitmq-contracts-and-publisher.md
+- story slug: 03-rabbitmq-contracts-and-publisher
+- branch name: feat/03-rabbitmq-contracts-and-publisher
+- agent markdown path: .cloudbot/agents/03-rabbitmq-contracts-and-publisher.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Completed missing order CQRS queries/endpoints while preserving existing product caching and MediatR foundation.
+- short note: Added shared order-submission contract and RabbitMQ publisher wiring; checkout now publishes OrderSubmitted after persistence with correlation-aware payloads.
