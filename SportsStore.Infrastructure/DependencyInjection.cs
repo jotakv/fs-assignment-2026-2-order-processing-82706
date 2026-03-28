@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddSingleton<ICheckoutUrlFactory, ConfigurationCheckoutUrlFactory>();
         services.AddScoped<IPaymentService, StripePaymentService>();
         services.AddScoped<IOrderEventPublisher, RabbitMqOrderEventPublisher>();
+        services.AddScoped<IInventoryEventPublisher, RabbitMqInventoryEventPublisher>();
 
         return services;
     }

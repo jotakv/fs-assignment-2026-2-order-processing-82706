@@ -37,7 +37,17 @@
 - branch name: feat/03-rabbitmq-contracts-and-publisher
 - agent markdown path: .cloudbot/agents/03-rabbitmq-contracts-and-publisher.md
 - status: completed
+- commit hash: c9252b4c8b514380a4f780ff9c1b5d4488ffcf91
+- PR link or identifier: PR #5
+- merge result: merged
+- short note: Added shared order-submission contract and RabbitMQ publisher wiring; checkout now publishes OrderSubmitted after persistence with correlation-aware payloads.
+
+- story filename: backlog/04-feat-inventory-service.md
+- story slug: 04-inventory-service
+- branch name: feat/04-inventory-service
+- agent markdown path: .cloudbot/agents/04-inventory-service.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Added shared order-submission contract and RabbitMQ publisher wiring; checkout now publishes OrderSubmitted after persistence with correlation-aware payloads.
+- short note: Added inventory worker project that consumes OrderSubmitted, simulates stock validation, persists InventoryRecord results, and publishes InventoryConfirmed/InventoryFailed.
