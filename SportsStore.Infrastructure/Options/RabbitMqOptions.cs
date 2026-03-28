@@ -15,4 +15,10 @@ public sealed class RabbitMqOptions
     public string ExchangeName { get; set; } = "sportsstore.orders";
 
     public string OrderSubmittedRoutingKey { get; set; } = "order.submitted";
+
+    public string InventoryConfirmedRoutingKey { get; set; } = "inventory.confirmed";
+
+    public string InventoryFailedRoutingKey { get; set; } = "inventory.failed";
+
+    public string InventoryQueueName { get; set; } = "sportsstore.inventory";
 }
