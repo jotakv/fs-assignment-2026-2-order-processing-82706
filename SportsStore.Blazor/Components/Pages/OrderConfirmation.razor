@@ -36,6 +36,17 @@ else if (_result is not null)
                 <span>Item count</span>
                 <strong>@_result.ItemCount</strong>
             </div>
+            @if (_status is not null)
+            {
+                <div class="summary-row">
+                    <span>Order tracking</span>
+                    <strong>@_status.Status</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Last event</span>
+                    <strong>@(_status.LastEvent ?? "OrderCreated")</strong>
+                </div>
+            }
         </div>
 
         <div class="status-actions">
@@ -55,6 +66,7 @@ else if (_result is not null)
     private bool _loading = true;
     private string? _error;
     private CheckoutCompletionDto? _result;
+    private OrderStatusDto? _status;
     private bool _loaded;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -81,6 +93,8 @@ else if (_result is not null)
                 SessionId = SessionId,
                 PendingCheckoutId = PendingCheckoutId
             });
+
+            _status = await OrdersApi.GetOrderStatusAsync(_result.OrderID);
 
             await CartState.ClearAsync();
             await RecentOrdersState.AddAsync(_result.OrderID);
