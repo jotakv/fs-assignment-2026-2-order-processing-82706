@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using Serilog.Context;
 using Serilog.Events;
+using SportsStore.Api.Infrastructure;
 using SportsStore.Application;
 using SportsStore.Infrastructure;
 using SportsStore.Infrastructure.Persistence;
@@ -9,6 +11,7 @@ using SportsStore.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
@@ -17,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .Enrich.WithMachineName()
     .Enrich.WithEnvironmentName()
-    .WriteTo.Console()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] ({ServiceName}) CorrelationId={CorrelationId} OrderId={OrderId} EventType={EventType} {Message:lj}{NewLine}{Exception}")
     .WriteTo.File("./Logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, shared: true)
     .WriteTo.Seq("http://localhost:5341")
     .CreateLogger();
@@ -44,13 +47,28 @@ app.UseExceptionHandler(errorApp =>
     errorApp.Run(async context =>
     {
         var feature = context.Features.Get<IExceptionHandlerPathFeature>();
-        Log.Error(feature?.Error, "Unhandled exception. Path={Path}", context.Request.Path);
+        using (LogContext.PushProperty("CorrelationId", context.TraceIdentifier))
+        using (LogContext.PushProperty("ServiceName", "SportsStore.Api"))
+        using (LogContext.PushProperty("EventType", "UnhandledException"))
+        {
+            Log.Error(feature?.Error, "Unhandled exception. Path={Path}", context.Request.Path);
+        }
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         await context.Response.WriteAsJsonAsync(new { error = "An unexpected error occurred." });
     });
 });
 
-app.UseSerilogRequestLogging();
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseSerilogRequestLogging(options =>
+{
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("CorrelationId", httpContext.TraceIdentifier);
+        diagnosticContext.Set("ServiceName", "SportsStore.Api");
+        diagnosticContext.Set("RequestPath", httpContext.Request.Path);
+        diagnosticContext.Set("RequestMethod", httpContext.Request.Method);
+    };
+});
 
 app.UseRequestLocalization(options =>
 {

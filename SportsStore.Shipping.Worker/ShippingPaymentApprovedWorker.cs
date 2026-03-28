@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Serilog.Context;
 using SportsStore.Application.Abstractions.Messaging;
 using SportsStore.Application.Contracts.Messaging;
 using SportsStore.Domain.Entities;
@@ -59,7 +60,15 @@ public sealed class ShippingPaymentApprovedWorker : BackgroundService
                 return;
             }
 
-            await ProcessAsync(integrationEvent, stoppingToken);
+            using (LogContext.PushProperty("CorrelationId", integrationEvent.CorrelationId))
+            using (LogContext.PushProperty("OrderId", integrationEvent.OrderId))
+            using (LogContext.PushProperty("CustomerId", integrationEvent.CustomerId))
+            using (LogContext.PushProperty("EventType", nameof(PaymentApprovedIntegrationEvent)))
+            using (LogContext.PushProperty("ServiceName", "ShippingService"))
+            {
+                _logger.LogInformation("Consumed payment approved event.");
+                await ProcessAsync(integrationEvent, stoppingToken);
+            }
             _channel.BasicAck(eventArgs.DeliveryTag, false);
         };
 
@@ -82,6 +91,7 @@ public sealed class ShippingPaymentApprovedWorker : BackgroundService
         var publisher = scope.ServiceProvider.GetRequiredService<IShippingEventPublisher>();
 
         ShipmentCreationResult decision = shipmentService.Create(integrationEvent);
+        _logger.LogInformation("Shipping creation completed. Succeeded={Succeeded}", decision.Succeeded);
         Order? order = await dbContext.Orders
             .Include(candidate => candidate.ShipmentRecords)
             .FirstOrDefaultAsync(candidate => candidate.OrderID == integrationEvent.OrderId, cancellationToken);

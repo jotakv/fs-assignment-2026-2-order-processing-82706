@@ -51,7 +51,8 @@ public sealed class RabbitMqOrderEventPublisher : IOrderEventPublisher
         byte[] payload = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(integrationEvent));
 
         _logger.LogInformation(
-            "Publishing {EventType} for OrderId={OrderId}, CustomerId={CustomerId}, CorrelationId={CorrelationId}, Exchange={Exchange}, RoutingKey={RoutingKey}",
+            "Publishing event. ServiceName={ServiceName}, EventType={EventType}, OrderId={OrderId}, CustomerId={CustomerId}, CorrelationId={CorrelationId}, Exchange={Exchange}, RoutingKey={RoutingKey}",
+            "OrderPublisher",
             nameof(OrderSubmittedIntegrationEvent),
             integrationEvent.OrderId,
             integrationEvent.CustomerId,

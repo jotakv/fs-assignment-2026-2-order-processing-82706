@@ -1,5 +1,6 @@
 using MediatR;
 using SportsStore.Application.Abstractions.Checkout;
+using Microsoft.Extensions.Logging;
 using SportsStore.Application.Abstractions.Messaging;
 using SportsStore.Application.Abstractions.Payments;
 using SportsStore.Application.Abstractions.Persistence;
@@ -26,26 +27,42 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
     private readonly IPaymentService _paymentService;
     private readonly IPendingCheckoutStore _pendingCheckoutStore;
     private readonly IOrderEventPublisher _orderEventPublisher;
+    private readonly ILogger<CompleteCheckoutCommandHandler> _logger;
 
     public CompleteCheckoutCommandHandler(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
         IPaymentService paymentService,
         IPendingCheckoutStore pendingCheckoutStore,
-        IOrderEventPublisher orderEventPublisher)
+        IOrderEventPublisher orderEventPublisher,
+        ILogger<CompleteCheckoutCommandHandler> logger)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _paymentService = paymentService;
         _pendingCheckoutStore = pendingCheckoutStore;
         _orderEventPublisher = orderEventPublisher;
+        _logger = logger;
     }
 
     public async Task<CheckoutCompletionDto> Handle(CompleteCheckoutCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation(
+            "Starting checkout completion for PendingCheckoutId={PendingCheckoutId}, CorrelationId={CorrelationId}, ServiceName={ServiceName}, EventType={EventType}",
+            request.PendingCheckoutId,
+            request.SessionId,
+            "SportsStore.Api",
+            "OrderSubmission");
+
         var existingOrder = await _orderRepository.GetByStripeSessionIdAsync(request.SessionId, cancellationToken);
         if (existingOrder is not null)
         {
+            _logger.LogInformation(
+                "Checkout completion resolved to an existing order. OrderId={OrderId}, CorrelationId={CorrelationId}, ServiceName={ServiceName}, EventType={EventType}",
+                existingOrder.OrderID,
+                request.SessionId,
+                "SportsStore.Api",
+                "OrderSubmission");
             return MapCompletion(existingOrder);
         }
 
@@ -144,6 +161,14 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
 
         Order savedOrder = await _orderRepository.AddAsync(order, cancellationToken);
 
+        _logger.LogInformation(
+            "Order persisted successfully and ready for event publication. OrderId={OrderId}, CustomerId={CustomerId}, CorrelationId={CorrelationId}, ServiceName={ServiceName}, EventType={EventType}",
+            savedOrder.OrderID,
+            savedOrder.CustomerId,
+            request.SessionId,
+            "SportsStore.Api",
+            "OrderSubmission");
+
         await _orderEventPublisher.PublishOrderSubmittedAsync(
             new OrderSubmittedIntegrationEvent
             {
@@ -173,6 +198,12 @@ public sealed class CompleteCheckoutCommandHandler : IRequestHandler<CompleteChe
 
         await _pendingCheckoutStore.RemoveAsync(request.PendingCheckoutId, cancellationToken);
 
+        _logger.LogInformation(
+            "Checkout completion finished successfully. OrderId={OrderId}, CorrelationId={CorrelationId}, ServiceName={ServiceName}, EventType={EventType}",
+            savedOrder.OrderID,
+            request.SessionId,
+            "SportsStore.Api",
+            "OrderSubmission");
         return MapCompletion(savedOrder);
     }
 

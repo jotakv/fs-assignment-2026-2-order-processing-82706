@@ -97,7 +97,17 @@
 - branch name: feat/09-react-admin-dashboard
 - agent markdown path: .cloudbot/agents/09-react-admin-dashboard.md
 - status: completed
+- commit hash: 148c2091e9e8cb8fcb8d9fd1b0dca070af2c51b2
+- PR link or identifier: PR #11
+- merge result: merged
+- short note: Added a separate React admin dashboard with orders table, status filters, failed orders screen, and operational order details powered by existing API endpoints.
+
+- story filename: backlog/10-feat-serilog-correlation-observability.md
+- story slug: 10-serilog-correlation-observability
+- branch name: feat/10-serilog-correlation-observability
+- agent markdown path: .cloudbot/agents/10-serilog-correlation-observability.md
+- status: completed
 - commit hash: pending
 - PR link or identifier: pending
 - merge result: pending
-- short note: Added a separate React admin dashboard with orders table, status filters, failed orders screen, and operational order details powered by existing API endpoints.
+- short note: Improved structured observability by adding API correlation middleware, richer Serilog request/error logs, and correlation-aware structured logs across checkout, publishers, and worker consumers/decision points.
