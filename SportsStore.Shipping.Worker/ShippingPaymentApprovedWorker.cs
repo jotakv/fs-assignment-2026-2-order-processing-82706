@@ -107,11 +107,12 @@ public sealed class ShippingPaymentApprovedWorker : BackgroundService
         };
 
         order.ShipmentRecords.Add(shipmentRecord);
-        order.Status = decision.Succeeded ? OrderStatus.ShippingCreated : OrderStatus.Failed;
+        order.Status = decision.Succeeded ? OrderStatus.Completed : OrderStatus.Failed;
         order.UpdatedAtUtc = DateTime.UtcNow;
         if (decision.Succeeded)
         {
             order.CompletedAtUtc = decision.EstimatedDispatchDateUtc;
+            order.Shipped = true;
         }
         else
         {
