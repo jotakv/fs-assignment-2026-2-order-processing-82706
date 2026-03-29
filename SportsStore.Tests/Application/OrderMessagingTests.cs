@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Moq;
 using SportsStore.Application.Abstractions.Checkout;
 using SportsStore.Application.Abstractions.Messaging;
@@ -74,7 +75,8 @@ public class OrderMessagingTests
             productRepository.Object,
             paymentService.Object,
             pendingStore.Object,
-            publisher.Object);
+            publisher.Object,
+            Mock.Of<ILogger<CompleteCheckoutCommandHandler>>());
 
         await handler.Handle(
             new CompleteCheckoutCommand
