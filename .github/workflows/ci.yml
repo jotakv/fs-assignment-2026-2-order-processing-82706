@@ -3,9 +3,9 @@ name: Test & Publish Coverage (xUnit + ReportGenerator)
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]   # <-- si tu repo usa master, cambia a "master"
+    branches: [ "master" ]   # <-- si tu repo usa master, cambia a "master"
   pull_request:
-    branches: [ "main" ]   # <-- idem
+    branches: [ "master" ]   # <-- idem
 
 concurrency:
   group: "pages"
@@ -63,14 +63,14 @@ jobs:
 
       # IMPORTANTE: este es el artifact que deploy-pages busca
       - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'   # <-- cambia a master si aplica
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'   # <-- cambia a master si aplica
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages   # <-- explícito
           path: coveragereport
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'       # <-- cambia a master si aplica
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'       # <-- cambia a master si aplica
     needs: build-and-test
     runs-on: ubuntu-latest
     environment:
