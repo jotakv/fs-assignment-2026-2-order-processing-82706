@@ -549,3 +549,24 @@ Marks will be awarded where:
 * controllers are not cluttered with manual mapping code
 
 AutoMapper should be used where appropriate, not excessively.
+
+## React admin dashboard
+
+A separate React admin dashboard now lives in `admin-dashboard/`.
+
+Run it locally with:
+
+```bash
+cd admin-dashboard
+npm install
+npm run dev
+```
+
+Build it with:
+
+```bash
+cd admin-dashboard
+npm run build
+```
+
+By default it calls the API at `https://localhost:5001/`. Override with `VITE_API_BASE_URL` if needed.
