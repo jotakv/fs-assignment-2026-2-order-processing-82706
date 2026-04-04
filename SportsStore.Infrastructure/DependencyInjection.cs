@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.Configure<ClientAppOptions>(configuration.GetSection(ClientAppOptions.SectionName));
         services.Configure<StripeOptions>(configuration.GetSection(StripeOptions.SectionName));
         services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
+        services.AddSingleton<IRabbitMqConnectionFactoryProvider, RabbitMqConnectionFactoryProvider>();
 
         services.AddDbContext<StoreDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("SportsStoreConnection")));

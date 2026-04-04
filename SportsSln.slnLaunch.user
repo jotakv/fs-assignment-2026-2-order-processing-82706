@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "START",
+    "Projects": [
+      {
+        "Path": "SportsStore.Api\\SportsStore.Api.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "SportsStore.Blazor\\SportsStore.Blazor.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "SportsStore.Inventory.Worker\\SportsStore.Inventory.Worker.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "SportsStore.Payment.Worker\\SportsStore.Payment.Worker.csproj",
+        "Action": "StartWithoutDebugging"
+      },
+      {
+        "Path": "SportsStore.Shipping.Worker\\SportsStore.Shipping.Worker.csproj",
+        "Action": "StartWithoutDebugging"
+      }
+    ]
+  }
+]
