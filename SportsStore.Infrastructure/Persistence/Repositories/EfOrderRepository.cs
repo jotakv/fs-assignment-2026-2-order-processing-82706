@@ -14,30 +14,34 @@ public sealed class EfOrderRepository : IOrderRepository
     }
 
     public async Task<IReadOnlyList<Order>> GetAllAsync(CancellationToken cancellationToken) =>
-        await OrdersQuery()
+        await DetailedOrdersQuery()
             .OrderByDescending(order => order.PaidAtUtc)
             .ThenByDescending(order => order.OrderID)
             .ToListAsync(cancellationToken);
 
     public Task<IReadOnlyList<Order>> GetByCustomerIdAsync(int customerId, CancellationToken cancellationToken) =>
-        OrdersQuery()
+        DetailedOrdersQuery()
             .Where(order => order.CustomerId == customerId)
             .OrderByDescending(order => order.CreatedAtUtc)
             .ToListAsync(cancellationToken)
             .ContinueWith(task => (IReadOnlyList<Order>)task.Result, cancellationToken);
 
     public Task<IReadOnlyList<Order>> GetByStatusAsync(OrderStatus status, CancellationToken cancellationToken) =>
-        OrdersQuery()
+        DetailedOrdersQuery()
             .Where(order => order.Status == status)
             .OrderByDescending(order => order.CreatedAtUtc)
             .ToListAsync(cancellationToken)
             .ContinueWith(task => (IReadOnlyList<Order>)task.Result, cancellationToken);
 
     public Task<Order?> GetByIdAsync(int orderId, CancellationToken cancellationToken) =>
-        OrdersQuery().FirstOrDefaultAsync(order => order.OrderID == orderId, cancellationToken);
+        DetailedOrdersQuery().FirstOrDefaultAsync(order => order.OrderID == orderId, cancellationToken);
 
     public Task<Order?> GetByStripeSessionIdAsync(string stripeSessionId, CancellationToken cancellationToken) =>
-        OrdersQuery().FirstOrDefaultAsync(order => order.StripeSessionId == stripeSessionId, cancellationToken);
+        _context.Orders
+            .AsNoTracking()
+            .Include(order => order.Lines)
+            .ThenInclude(line => line.Product)
+            .FirstOrDefaultAsync(order => order.StripeSessionId == stripeSessionId, cancellationToken);
 
     public async Task<Order> AddAsync(Order order, CancellationToken cancellationToken)
     {
@@ -70,9 +74,10 @@ public sealed class EfOrderRepository : IOrderRepository
         return true;
     }
 
-    private IQueryable<Order> OrdersQuery() =>
+    private IQueryable<Order> DetailedOrdersQuery() =>
         _context.Orders
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(order => order.Customer)
             .Include(order => order.Lines)
             .ThenInclude(line => line.Product)
