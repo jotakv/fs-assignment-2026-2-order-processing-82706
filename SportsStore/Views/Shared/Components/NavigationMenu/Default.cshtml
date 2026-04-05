@@ -1,17 +1,26 @@
-﻿@model IEnumerable<string>
+@model IEnumerable<string>
+@{
+    var adminDashboardUrl = (string?)ViewBag.AdminDashboardUrl ?? "http://localhost:5174";
+}
 
 <div class="d-grid gap-2">
-    <a class="btn btn-outline-secondary"asp-action="Index"
+    <a class="btn btn-outline-secondary" asp-action="Index"
        asp-controller="Home" asp-route-category="">
         Home
     </a>
     @foreach (string category in Model ?? Enumerable.Empty<string>()) {
-        <a class="btn @(category == ViewBag.SelectedCategory 
-                ? "btn-primary": "btn-outline-secondary")"
+        <a class="btn @(category == ViewBag.SelectedCategory
+                ? "btn-primary" : "btn-outline-secondary")"
            asp-action="Index" asp-controller="Home"
            asp-route-category="@category"
            asp-route-productPage="1">
             @category
         </a>
     }
+    <a class="btn btn-outline-info"
+       href="@adminDashboardUrl"
+       target="_blank"
+       rel="noopener noreferrer">
+        Admin Dashboard
+    </a>
 </div>

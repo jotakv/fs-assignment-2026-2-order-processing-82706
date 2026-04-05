@@ -7,6 +7,14 @@ export type OrderDto = {
   totalAmount: number
   status: string
   stripePaymentStatus?: string
+  paymentStatus?: string
+  inventoryResult?: string
+  inventoryReference?: string
+  shipmentCarrier?: string
+  shipmentReference?: string
+  trackingNumber?: string
+  failureReason?: string
+  updatedAtUtc: string
 }
 
 export type AdminOrderDetailsDto = {
@@ -17,6 +25,7 @@ export type AdminOrderDetailsDto = {
   paymentReference?: string
   inventoryResult?: string
   inventoryReference?: string
+  shipmentCarrier?: string
   shipmentReference?: string
   trackingNumber?: string
   failureReason?: string
