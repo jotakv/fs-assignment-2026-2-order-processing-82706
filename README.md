@@ -250,6 +250,8 @@ RabbitMQ must be used to coordinate asynchronous order processing.
 
 Students must define message contracts shared between services.
 
+The solution now reads broker settings from the `RabbitMq` configuration section in the API and worker `appsettings.json` files. For local development, keep the tracked JSON structure and override the secret with `RabbitMq__Password` or the full AMQPS connection string with `RabbitMq__Uri`. When `RabbitMq__Uri` is provided it takes precedence over the individual host, port, username, password, and virtual host fields.
+
 **Example Events**
 
 * `OrderSubmitted`

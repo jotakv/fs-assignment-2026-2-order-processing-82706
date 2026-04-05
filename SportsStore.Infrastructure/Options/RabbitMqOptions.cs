@@ -4,13 +4,19 @@ public sealed class RabbitMqOptions
 {
     public const string SectionName = "RabbitMq";
 
-    public string HostName { get; set; } = "localhost";
+    public string Uri { get; set; } = string.Empty;
 
-    public int Port { get; set; } = 5672;
+    public string HostName { get; set; } = string.Empty;
 
-    public string UserName { get; set; } = "guest";
+    public int Port { get; set; }
 
-    public string Password { get; set; } = "guest";
+    public string UserName { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+
+    public string VirtualHost { get; set; } = string.Empty;
+
+    public bool UseTls { get; set; }
 
     public string ExchangeName { get; set; } = "sportsstore.orders";
 
