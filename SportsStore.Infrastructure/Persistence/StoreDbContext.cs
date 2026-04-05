@@ -69,6 +69,8 @@ public class StoreDbContext : DbContext
 
         modelBuilder.Entity<CartLine>(entity =>
         {
+            entity.ToTable("CartLine");
+
             entity.HasOne<Order>()
                 .WithMany(order => order.Lines)
                 .HasForeignKey("OrderID")
