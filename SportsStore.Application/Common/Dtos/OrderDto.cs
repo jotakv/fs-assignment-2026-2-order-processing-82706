@@ -36,7 +36,23 @@ public sealed class OrderDto
 
     public string? StripePaymentStatus { get; set; }
 
+    public string? PaymentStatus { get; set; }
+
+    public string? InventoryResult { get; set; }
+
+    public string? InventoryReference { get; set; }
+
+    public string? ShipmentCarrier { get; set; }
+
+    public string? ShipmentReference { get; set; }
+
+    public string? TrackingNumber { get; set; }
+
+    public string? FailureReason { get; set; }
+
     public DateTime? PaidAtUtc { get; set; }
+
+    public DateTime UpdatedAtUtc { get; set; }
 
     public decimal TotalAmount { get; set; }
 

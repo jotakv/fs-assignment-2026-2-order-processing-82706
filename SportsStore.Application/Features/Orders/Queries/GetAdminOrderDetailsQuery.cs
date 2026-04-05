@@ -36,6 +36,7 @@ public sealed class GetAdminOrderDetailsQueryHandler : IRequestHandler<GetAdminO
             PaymentReference = latestPayment?.ExternalPaymentId ?? order.StripePaymentIntentId,
             InventoryResult = latestInventory is null ? null : latestInventory.Succeeded ? "Confirmed" : "Failed",
             InventoryReference = latestInventory?.ReservationReference,
+            ShipmentCarrier = latestShipment?.Carrier,
             ShipmentReference = latestShipment?.ShipmentReference,
             TrackingNumber = latestShipment?.TrackingNumber,
             FailureReason = latestShipment?.FailureReason ?? latestPayment?.FailureReason ?? latestInventory?.FailureReason,

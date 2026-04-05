@@ -16,6 +16,8 @@ public sealed class AdminOrderDetailsDto
 
     public string? InventoryReference { get; set; }
 
+    public string? ShipmentCarrier { get; set; }
+
     public string? ShipmentReference { get; set; }
 
     public string? TrackingNumber { get; set; }
