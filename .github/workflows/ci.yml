@@ -1,14 +1,14 @@
-name: Test & Publish Coverage (xUnit + ReportGenerator)
+name: CI
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "master" ]   # <-- si tu repo usa master, cambia a "master"
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]   # <-- idem
+    branches: ["master"]
 
 concurrency:
-  group: "pages"
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -17,28 +17,32 @@ permissions:
   id-token: write
 
 env:
-  DOTNET_VERSION: "9.0.x"  # <-- pon la versión que case con tus tests (net9 => 9.0.x)
-  TEST_PROJECT: "SportsStore.Tests/SportsStore.Tests.csproj"  # <-- ajusta a tu csproj real
+  DOTNET_VERSION: "9.0.x"
+  NODE_VERSION: "20.x"
+  SOLUTION_FILE: "SportsSln.sln"
+  TEST_PROJECT: "SportsStore.Tests/SportsStore.Tests.csproj"
 
 jobs:
-  build-and-test:
+  backend-validation:
+    name: Backend Validation (.NET)
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore
-        run: dotnet restore
+      - name: Restore solution
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
 
-      - name: Build
-        run: dotnet build --no-restore -c Release
+      - name: Build solution
+        run: dotnet build ${{ env.SOLUTION_FILE }} --no-restore -c Release
 
-      - name: Test (xUnit) and collect coverage
+      - name: Test solution and collect coverage
         run: >
           dotnet test ${{ env.TEST_PROJECT }} -c Release --no-build
           --collect:"XPlat Code Coverage"
@@ -55,23 +59,52 @@ jobs:
             -targetdir:"coveragereport" \
             -reporttypes:"Html"
 
-      - name: Upload coverage as build artifact
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-html
           path: coveragereport
 
-      # IMPORTANTE: este es el artifact que deploy-pages busca
-      - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'   # <-- cambia a master si aplica
+      - name: Upload GitHub Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages   # <-- explícito
+          name: github-pages
           path: coveragereport
 
+  admin-dashboard-validation:
+    name: Admin Dashboard Validation (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-dashboard
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: admin-dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        run: npm ci
+
+      - name: Run dashboard tests if defined
+        run: npm run test --if-present
+
+      - name: Build admin dashboard
+        run: npm run build
+
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'       # <-- cambia a master si aplica
-    needs: build-and-test
+    name: Publish Coverage Report
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs:
+      - backend-validation
+      - admin-dashboard-validation
     runs-on: ubuntu-latest
     environment:
       name: github-pages
