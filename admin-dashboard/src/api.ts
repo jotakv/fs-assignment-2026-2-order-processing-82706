@@ -70,7 +70,7 @@ async function requestJson<T>(path: string): Promise<T> {
     throw new Error(
       API_BASE
         ? `Unable to reach the order API at ${API_BASE}. Confirm the backend is running and the base URL is correct.`
-        : 'Unable to reach the order API through the Vite proxy. Confirm the backend is running on https://localhost:7061 or set VITE_API_PROXY_TARGET.',
+        : 'Unable to reach the order API through the configured /api proxy. Confirm the backend is running or set VITE_API_BASE_URL.',
     )
   }
 
@@ -90,7 +90,7 @@ async function requestJson<T>(path: string): Promise<T> {
 }
 
 export function getApiConnectionHint(): string {
-  return API_BASE || 'Vite /api proxy -> https://localhost:7061'
+  return API_BASE || 'Relative /api proxy'
 }
 
 export function getOrders(status?: string): Promise<OrderDto[]> {

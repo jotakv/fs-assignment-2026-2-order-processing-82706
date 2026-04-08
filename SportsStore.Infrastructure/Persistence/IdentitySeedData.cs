@@ -14,9 +14,16 @@ public static class IdentitySeedData
         using IServiceScope scope = services.CreateScope();
         AppIdentityDbContext context = scope.ServiceProvider.GetRequiredService<AppIdentityDbContext>();
 
-        if ((await context.Database.GetPendingMigrationsAsync()).Any())
+        if (context.Database.GetMigrations().Any())
         {
-            await context.Database.MigrateAsync();
+            if ((await context.Database.GetPendingMigrationsAsync()).Any())
+            {
+                await context.Database.MigrateAsync();
+            }
+        }
+        else
+        {
+            await context.Database.EnsureCreatedAsync();
         }
 
         UserManager<IdentityUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();

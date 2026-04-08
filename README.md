@@ -552,9 +552,91 @@ Marks will be awarded where:
 
 AutoMapper should be used where appropriate, not excessively.
 
+## Run the distributed platform with Docker Compose
+
+The repository root now contains the Assignment 2 runtime entry point: `docker-compose.yml`.
+
+This root compose setup is the real distributed platform for the current solution:
+
+* `SportsStore.Api`
+* `SportsStore.Inventory.Worker`
+* `SportsStore.Payment.Worker`
+* `SportsStore.Shipping.Worker`
+* `SportsStore.Blazor`
+* `admin-dashboard`
+* `RabbitMQ`
+* `SQL Server`
+
+The older Docker assets under `SportsStore/` belong to the legacy MVC project and are no longer the main runtime path for Assignment 2.
+
+### Prerequisites
+
+* Docker Desktop or Docker Engine with Docker Compose v2
+* At least one free local SQL Server port (`1433`) and RabbitMQ Management port (`15672`)
+* Optional Stripe test keys if you want to execute the checkout flow end-to-end
+
+### Start everything from the repository root
+
+```bash
+docker compose up --build
+```
+
+To remove the containers later:
+
+```bash
+docker compose down
+```
+
+To also remove the persisted SQL Server and RabbitMQ data volumes:
+
+```bash
+docker compose down -v
+```
+
+### Services started by Compose
+
+* `db` hosts the shared SQL Server instance used by the API and workers
+* `rabbitmq` hosts the shared broker and management UI
+* `api` exposes the order management API and seeds the shared database on first start
+* `inventory-worker`, `payment-worker`, and `shipping-worker` process the RabbitMQ workflow
+* `blazor` hosts the customer portal
+* `admin-dashboard` hosts the React administration UI and proxies `/api` requests to the API container
+
+### Exposed ports
+
+| Service | Compose service | Host access |
+| :--- | :--- | :--- |
+| Order API | `api` | `http://localhost:7061` |
+| Blazor customer portal | `blazor` | `http://localhost:7049` |
+| Admin dashboard | `admin-dashboard` | `http://localhost:5174` |
+| RabbitMQ AMQP | `rabbitmq` | `localhost:5672` |
+| RabbitMQ Management UI | `rabbitmq` | `http://localhost:15672` |
+| SQL Server | `db` | `localhost:1433` |
+
+### Access points
+
+* API example: `http://localhost:7061/api/products`
+* RabbitMQ Management UI: `http://localhost:15672` using `guest / guest`
+* Blazor app: `http://localhost:7049`
+* Admin dashboard: `http://localhost:5174`
+
+### Environment assumptions
+
+* The compose file uses a shared SQL Server container for both `SportsStore` and `SportsStoreIdentity`.
+* The API and all workers use the Docker service names `db` and `rabbitmq` instead of `localhost`.
+* SQL Server uses `sa` with the password from `SQL_SA_PASSWORD`. If you do not override it, compose uses `Your_password123!`.
+* RabbitMQ uses the local `guest / guest` account on the default `/` virtual host.
+* Stripe is not bundled in the repository. If `STRIPE_PUBLISHABLE_KEY` and `STRIPE_SECRET_KEY` are not provided, the containers still start, but checkout session creation will fail until valid Stripe keys are supplied.
+
+### Notes for evaluators
+
+* This compose file is intended for the current distributed Assignment 2 architecture, not the legacy monolith in `SportsStore/`.
+* The order database migrations and product seed data run on API startup.
+* The identity database is created automatically on a fresh containerized SQL Server instance so the system can start from an empty shared database.
+
 ## React admin dashboard
 
-A separate React admin dashboard now lives in `admin-dashboard/`.
+A separate React admin dashboard also remains runnable outside Docker in `admin-dashboard/`.
 
 Run it locally with:
 
@@ -571,4 +653,4 @@ cd admin-dashboard
 npm run build
 ```
 
-By default it calls the API at `https://localhost:5001/`. Override with `VITE_API_BASE_URL` if needed.
+By default local development uses the Vite `/api` proxy targeting `https://localhost:7061`. Override with `VITE_API_PROXY_TARGET` or `VITE_API_BASE_URL` if needed.
