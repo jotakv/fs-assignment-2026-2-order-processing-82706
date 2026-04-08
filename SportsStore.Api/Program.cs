@@ -9,8 +9,9 @@ using SportsStore.Infrastructure;
 using SportsStore.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+string? seqServerUrl = builder.Configuration["Serilog:SeqServerUrl"];
 
-Log.Logger = new LoggerConfiguration()
+var loggerConfiguration = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -22,8 +23,14 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithEnvironmentName()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] ({ServiceName}) CorrelationId={CorrelationId} OrderId={OrderId} EventType={EventType} {Message:lj}{NewLine}{Exception}")
     .WriteTo.File("./Logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, shared: true)
-    .WriteTo.Seq("http://localhost:5341")
-    .CreateLogger();
+    ;
+
+if (!string.IsNullOrWhiteSpace(seqServerUrl))
+{
+    loggerConfiguration.WriteTo.Seq(seqServerUrl);
+}
+
+Log.Logger = loggerConfiguration.CreateLogger();
 
 builder.Host.UseSerilog();
 

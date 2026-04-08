@@ -1,0 +1,139 @@
+name: sportsstore-assignment2
+
+x-backend-env: &backend-env
+  ConnectionStrings__SportsStoreConnection: Server=db,1433;Database=SportsStore;User Id=sa;Password=${SQL_SA_PASSWORD:-Your_password123!};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true
+  ConnectionStrings__IdentityConnection: Server=db,1433;Database=SportsStoreIdentity;User Id=sa;Password=${SQL_SA_PASSWORD:-Your_password123!};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true
+  RabbitMq__HostName: rabbitmq
+  RabbitMq__Port: "5672"
+  RabbitMq__UserName: guest
+  RabbitMq__Password: guest
+  RabbitMq__VirtualHost: "/"
+  RabbitMq__UseTls: "false"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:-Your_password123!}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -Q "SELECT 1" -C > /dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - -q
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: SportsStore.Api/Dockerfile
+    environment:
+      <<: *backend-env
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ClientApp__BaseUrl: http://localhost:7049
+      Serilog__SeqServerUrl: ""
+      Stripe__PublishableKey: ${STRIPE_PUBLISHABLE_KEY:-}
+      Stripe__SecretKey: ${STRIPE_SECRET_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7061:8080"
+
+  inventory-worker:
+    build:
+      context: .
+      dockerfile: SportsStore.Inventory.Worker/Dockerfile
+    environment:
+      <<: *backend-env
+      DOTNET_ENVIRONMENT: Production
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-worker:
+    build:
+      context: .
+      dockerfile: SportsStore.Payment.Worker/Dockerfile
+    environment:
+      <<: *backend-env
+      DOTNET_ENVIRONMENT: Production
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  shipping-worker:
+    build:
+      context: .
+      dockerfile: SportsStore.Shipping.Worker/Dockerfile
+    environment:
+      <<: *backend-env
+      DOTNET_ENVIRONMENT: Production
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  blazor:
+    build:
+      context: .
+      dockerfile: SportsStore.Blazor/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Api__BaseUrl: http://api:8080/
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "7049:8080"
+
+  admin-dashboard:
+    build:
+      context: .
+      dockerfile: admin-dashboard/Dockerfile
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "5174:80"
+
+volumes:
+  sqlserver-data:
+  rabbitmq-data:

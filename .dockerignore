@@ -1,0 +1,10 @@
+.git
+.vs/
+SportsStore/
+TestResults/
+**/bin/
+**/obj/
+**/node_modules/
+**/Logs/
+**/*.user
+**/*.suo
